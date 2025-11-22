@@ -66,31 +66,32 @@
   <script>
     // Traductions UI
     const i18n = {
-      uk: {
-        heading: "Планування дня",
-        datePrefix: "Дата:",
-        crew: "Бригада",
-        start: "Початок",
-        address: "Адреса",
-        status_ok: "На місці",
-        status_warn: "Затримка",
-        ticker: "Безпека перш за все. Перевірте засоби індивідуального захисту.",
-        langLabel: "Українська",
-        lastUpdate: "Оновлено:"
-      },
-      fr: {
-        heading: "Planning du jour",
-        datePrefix: "Date :",
-        crew: "Équipe",
-        start: "Début",
-        address: "Adresse",
-        status_ok: "Sur site",
-        status_warn: "Retard",
-        ticker: "La sécurité avant tout. Vérifiez vos EPI.",
-        langLabel: "Français",
-        lastUpdate: "Mis à jour :"
-      }
-    };
+  uk: {
+    heading: "Планування дня",
+    datePrefix: "Дата:",
+    crew: "Бригада",
+    start: "Початок",
+    address: "Адреса",
+    status_ok: "На місці",
+    status_warn: "Затримка",
+    ticker: "Перевірте обладнання та інструменти", // ✅ nouveau texte en ukrainien
+    langLabel: "Українська",
+    lastUpdate: "Оновлено:"
+  },
+  fr: {
+    heading: "Planning du jour",
+    datePrefix: "Date :",
+    crew: "Équipe",
+    start: "Début",
+    address: "Adresse",
+    status_ok: "Sur site",
+    status_warn: "Retard",
+    ticker: "Pensez à vérifier le matériel et les outils", // ✅ nouveau texte en français
+    langLabel: "Français",
+    lastUpdate: "Mis à jour :"
+  }
+};
+
 
     // Préférence de langue
     let lang = localStorage.getItem("lang") || "uk";
@@ -197,3 +198,4 @@
   </script>
 </body>
 </html>
+
