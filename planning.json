@@ -1,18 +1,14 @@
 [
   {
-    "title": { "uk": "Будмайданчик: Ремонт фасаду", "fr": "Chantier: Rénovation de façade" },
-    "address": { "uk": "Марсель, 13008", "fr": "Marseille, 13008" },
+    "id": "chantier1",
+    "title": "Rénovation façade",
+    "address": "Marseille, 13008",
     "start": "08:00",
-    "crew": "Бригада A / Équipe A",
+    "crew": [
+      { "type": "ouvrier", "name": "Ouvrier 1" },
+      { "type": "tache", "name": "Carrelage" }
+    ],
     "status": "ok",
     "photo": "images/facade.jpg"
-  },
-  {
-    "title": { "uk": "Монтаж сантехніки", "fr": "Installation plomberie" },
-    "address": { "uk": "Алло, 13190", "fr": "Allauch, 13190" },
-    "start": "09:30",
-    "crew": "Бригада B / Équipe B",
-    "status": "warn",
-    "photo": "images/plomberie.jpg"
   }
 ]

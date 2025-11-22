@@ -1,127 +1,135 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <title>Admin planning — Glisser-déposer</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
-    h1 { margin-bottom:20px; }
-    .wrap { display:flex; gap:20px; }
-    .sidebar, .main { background:#fff; padding:15px; border-radius:8px; flex:1; }
-    .chip { background:#e0e7ff; padding:8px 12px; border-radius:6px; margin:5px 0; cursor:grab; }
-    .chip:active { cursor:grabbing; }
-    .site { border:1px solid #ddd; border-radius:8px; margin-bottom:15px; overflow:hidden; }
-    .site img { width:100%; height:150px; object-fit:cover; }
-    .site-body { padding:10px; }
-    .droppable { min-height:40px; border:2px dashed #60a5fa; padding:8px; border-radius:6px; }
-    .droppable.dragover { background:#dbeafe; }
-    .worker { background:#93c5fd; border-radius:999px; padding:4px 8px; margin:4px; display:inline-block; }
-  </style>
+<meta charset="utf-8">
+<title>Admin planning</title>
+<style>
+  body { font-family: Arial, sans-serif; display:flex; gap:20px; margin:20px; }
+  .sidebar { width:220px; }
+  .chip { background:#60a5fa; color:#fff; padding:8px 12px; margin:5px 0; border-radius:6px; cursor:grab; }
+  .chip:active { cursor:grabbing; }
+  .site { border:1px solid #ccc; border-radius:8px; padding:10px; margin-bottom:15px; background:#f9fafb; }
+  .droppable { min-height:40px; border:2px dashed #60a5fa; padding:8px; border-radius:6px; margin-top:8px; }
+  .droppable.dragover { background:#dbeafe; }
+  .tag { background:#93c5fd; border-radius:999px; padding:4px 8px; margin:4px; display:inline-block; }
+</style>
 </head>
 <body>
-  <h1>Admin planning — glisser-déposer ouvriers vers chantiers</h1>
-  <div class="wrap">
-    <aside class="sidebar">
-      <h2>Ouvriers</h2>
-      <input id="workerName" placeholder="Nom de l'ouvrier" />
-      <button onclick="addWorker()">Ajouter</button>
-      <div id="workersList"></div>
-    </aside>
 
-    <main class="main">
-      <h2>Chantiers du jour</h2>
-      <input id="siteTitle" placeholder="Titre du chantier" />
-      <input id="siteAddress" placeholder="Adresse" />
-      <input id="siteStart" placeholder="Heure de début (ex: 08:00)" />
-      <input id="sitePhoto" placeholder="Chemin photo (ex: images/chantier.jpg)" />
-      <button onclick="addSite()">Ajouter chantier</button>
-      <div id="sitesGrid"></div>
-    </main>
-  </div>
+<div class="sidebar">
+  <h3>Ouvriers</h3>
+  <input id="workerName" placeholder="Nom de l'ouvrier">
+  <button onclick="addWorker()">Ajouter</button>
+  <div id="workersList"></div>
 
-  <script>
-    let workers = [];
-    let sites = [];
+  <h3>Tâches</h3>
+  <input id="taskName" placeholder="Nom de la tâche">
+  <button onclick="addTask()">Ajouter</button>
+  <div id="tasksList"></div>
 
-    function renderWorkers() {
-      const list = document.getElementById("workersList");
-      list.innerHTML = "";
-      workers.forEach(w => {
-        const div = document.createElement("div");
-        div.className = "chip";
-        div.textContent = w.name;
-        div.draggable = true;
-        div.dataset.id = w.id;
-        div.addEventListener("dragstart", e => {
-          e.dataTransfer.setData("text/plain", w.id);
-        });
-        list.appendChild(div);
-      });
-    }
+  <button onclick="exportJSON()">⬇️ Exporter JSON</button>
+</div>
 
-    function renderSites() {
-      const grid = document.getElementById("sitesGrid");
-      grid.innerHTML = "";
-      sites.forEach(site => {
-        const card = document.createElement("div");
-        card.className = "site";
-        card.innerHTML = `
-          <img src="${site.photo || 'images/placeholder.jpg'}" alt="${site.title}">
-          <div class="site-body">
-            <strong>${site.title}</strong><br>
-            📍 ${site.address}<br>
-            🕗 ${site.start}<br>
-            <div class="droppable" data-id="${site.id}"></div>
-          </div>
-        `;
-        const dropzone = card.querySelector(".droppable");
-        dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
-        dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
-        dropzone.addEventListener("drop", e => {
-          e.preventDefault();
-          dropzone.classList.remove("dragover");
-          const workerId = e.dataTransfer.getData("text/plain");
-          const worker = workers.find(w => w.id === workerId);
-          if (worker) {
-            site.crew.push(worker.name);
-            renderSites();
-          }
-        });
-        site.crew.forEach(name => {
-          const span = document.createElement("span");
-          span.className = "worker";
-          span.textContent = name;
-          dropzone.appendChild(span);
-        });
-        grid.appendChild(card);
-      });
-    }
+<div class="main">
+  <h2>Chantiers du jour</h2>
+  <input id="siteTitle" placeholder="Titre du chantier">
+  <input id="siteAddress" placeholder="Adresse">
+  <input id="siteStart" placeholder="Heure de début (ex: 08:00)">
+  <input id="sitePhoto" placeholder="Chemin photo (ex: images/chantier.jpg)">
+  <button onclick="addSite()">Ajouter chantier</button>
 
-    function addWorker() {
-      const name = document.getElementById("workerName").value.trim();
-      if (!name) return;
-      workers.push({ id: Math.random().toString(36).slice(2,9), name });
-      document.getElementById("workerName").value = "";
-      renderWorkers();
-    }
+  <div id="sitesGrid"></div>
+</div>
 
-    function addSite() {
-      const title = document.getElementById("siteTitle").value.trim();
-      const address = document.getElementById("siteAddress").value.trim();
-      const start = document.getElementById("siteStart").value.trim();
-      const photo = document.getElementById("sitePhoto").value.trim();
-      if (!title || !address) return;
-      sites.push({ id: Math.random().toString(36).slice(2,9), title, address, start, photo, crew: [] });
-      document.getElementById("siteTitle").value = "";
-      document.getElementById("siteAddress").value = "";
-      document.getElementById("siteStart").value = "";
-      document.getElementById("sitePhoto").value = "";
+<script>
+let workers = [];
+let tasks = [];
+let sites = [];
+
+function makeChip(type, name) {
+  const div = document.createElement("div");
+  div.className = "chip";
+  div.textContent = (type==="ouvrier"?"👷 ":"🛠️ ") + name;
+  div.draggable = true;
+  div.dataset.type = type;
+  div.dataset.name = name;
+  div.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("text/plain", JSON.stringify({type, name}));
+  });
+  return div;
+}
+
+function addWorker() {
+  const name = document.getElementById("workerName").value.trim();
+  if (!name) return;
+  workers.push(name);
+  document.getElementById("workersList").appendChild(makeChip("ouvrier", name));
+  document.getElementById("workerName").value="";
+}
+
+function addTask() {
+  const name = document.getElementById("taskName").value.trim();
+  if (!name) return;
+  tasks.push(name);
+  document.getElementById("tasksList").appendChild(makeChip("tache", name));
+  document.getElementById("taskName").value="";
+}
+
+function addSite() {
+  const title = document.getElementById("siteTitle").value.trim();
+  const address = document.getElementById("siteAddress").value.trim();
+  const start = document.getElementById("siteStart").value.trim();
+  const photo = document.getElementById("sitePhoto").value.trim();
+  if (!title || !address) return;
+  const id = "site"+Math.random().toString(36).slice(2,9);
+  sites.push({id,title,address,start,photo,crew:[],status:"ok"});
+  renderSites();
+  document.getElementById("siteTitle").value="";
+  document.getElementById("siteAddress").value="";
+  document.getElementById("siteStart").value="";
+  document.getElementById("sitePhoto").value="";
+}
+
+function renderSites() {
+  const grid = document.getElementById("sitesGrid");
+  grid.innerHTML="";
+  sites.forEach(site=>{
+    const card=document.createElement("div");
+    card.className="site";
+    card.innerHTML=`
+      <strong>${site.title}</strong><br>
+      📍 ${site.address}<br>
+      🕗 ${site.start}<br>
+      <div class="droppable" data-id="${site.id}"></div>
+    `;
+    const dropzone=card.querySelector(".droppable");
+    dropzone.addEventListener("dragover", e=>{e.preventDefault();dropzone.classList.add("dragover");});
+    dropzone.addEventListener("dragleave", ()=>dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", e=>{
+      e.preventDefault();dropzone.classList.remove("dragover");
+      const data=JSON.parse(e.dataTransfer.getData("text/plain"));
+      site.crew.push(data);
       renderSites();
-    }
+    });
+    site.crew.forEach(c=>{
+      const span=document.createElement("span");
+      span.className="tag";
+      span.textContent=(c.type==="ouvrier"?"👷 ":"🛠️ ")+c.name;
+      dropzone.appendChild(span);
+    });
+    grid.appendChild(card);
+  });
+}
 
-    // Init
-    renderWorkers();
-    renderSites();
-  </script>
+function exportJSON() {
+  const json=JSON.stringify(sites,null,2);
+  const blob=new Blob([json],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="planning.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
 </body>
 </html>
