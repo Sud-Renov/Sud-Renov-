@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Планування працівників — Відображення</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--muted:#94a3b8;--accent:#60a5fa}
+    html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#021028 0%, #061026 100%);color:#e6eef8}
+    .wrap{padding:18px;display:flex;flex-direction:column;gap:12px;height:100%}
+    header{display:flex;justify-content:space-between;align-items:center}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{background:var(--card);border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:inherit;cursor:pointer}
+    .lang button.active{outline:2px solid rgba(96,165,250,0.18)}
+    main{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;align-items:stretch}
+    .column{background:rgba(255,255,255,0.02);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+    .col-head{display:flex;justify-content:space-between;align-items:center}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:8px;min-height:200px}
+    .thumb{height:120px;border-radius:8px;object-fit:cover;background:#071126}
+    .site{font-weight:600}
+    .tasks{font-size:13px;color:var(--muted);line-height:1.2}
+    .workers{display:flex;gap:6px}
+    .workers img{width:32px;height:32px;border-radius:50%;object-fit:cover}
+    footer{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+    .status{font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+    @media (max-width:800px){main{grid-template-columns:1fr}} 
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 id="title">Планування працівників</h1>
+      <div class="controls">
+        <div class="lang" role="group" aria-label="langues">
+          <button id="btn-fr">FR</button>
+          <button id="btn-uk" class="active">UKR</button>
+        </div>
+        <button id="refresh">Оновити зараз</button>
+        <div class="small">Авто-оновлення: <span id="interval">30s</span></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="column" id="col-today">
+        <div class="col-head"><div><strong id="label-today">Сьогодні</strong></div><div class="small" id="date-today"></div></div>
+        <div class="cards" id="cards-today"></div>
+      </section>
+
+      <section class="column" id="col-tomorrow">
+        <div class="col-head"><div><strong id="label-tomorrow">Завтра</strong></div><div class="small" id="date-tomorrow"></div></div>
+        <div class="cards" id="cards-tomorrow"></div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="status" id="status">Останнє оновлення: ---</div>
+      <div class="small">Режим: публічне відображення &nbsp;•&nbsp; Джерело: <span id="data-source">не налаштовано</span></div>
+    </footer>
+  </div>
+
+  <script>
+    const DATA_URL = 'https://example.com/planning.json'; // <-- замініть на URL вашого JSON
+    const POLL_INTERVAL = 30000;
+
+    const btnFr = document.getElementById('btn-fr');
+    const btnUk = document.getElementById('btn-uk');
+    const refreshBtn = document.getElementById('refresh');
+    const statusEl = document.getElementById('status');
+    const dataSourceEl = document.getElementById('data-source');
+    const cardsToday = document.getElementById('cards-today');
+    const cardsTomorrow = document.getElementById('cards-tomorrow');
+    const dateTodayEl = document.getElementById('date-today');
+    const dateTomorrowEl = document.getElementById('date-tomorrow');
+    const intervalEl = document.getElementById('interval');
+
+    intervalEl.textContent = Math.round(POLL_INTERVAL/1000) + 's';
+    dataSourceEl.textContent = DATA_URL;
+
+    // Українська за замовчуванням
+    let lang = 'uk';
+    btnFr.classList.remove('active');
+    btnUk.classList.add('active');
+
+    btnFr.addEventListener('click', ()=>{ setLang('fr'); });
+    btnUk.addEventListener('click', ()=>{ setLang('uk'); });
+    refreshBtn.addEventListener('click', ()=>{ fetchAndRender(true); });
+
+    let lastData = null;
+
+    function isoDate(d){ return d.toISOString().slice(0,10); }
+    function readableDate(d){ return d.toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'2-digit'}); }
+
+    function clearCards(){ cardsToday.innerHTML=''; cardsTomorrow.innerHTML=''; }
+
+    function createCard(item){
+      const card = document.createElement('div'); card.className='card';
+      const img = document.createElement('img'); img.className='thumb'; img.alt = item.site?.[lang] || item.name?.[lang] || 'chantier';
+      img.src = item.image || '';
+      img.onerror = ()=>{ img.src = placeholderDataURI(item.site?.[lang] || item.name?.[lang]); }
+      const site = document.createElement('div'); site.className='site'; site.textContent = item.site?.[lang] || item.name?.[lang] || '—';
+      const tasks = document.createElement('div'); tasks.className='tasks';
+      const arr = item.tasks?.[lang] || [];
+      if(arr.length===0) tasks.textContent = (lang==='fr'?'Aucune tâche':'Немає завдань');
+      else tasks.innerHTML = '<ul style="margin:6px 0 0 16px;padding:0">'+arr.map(t=>' <li>'+escapeHtml(t)+'</li>').join('')+'</ul>';
+      card.appendChild(img); card.appendChild(site); card.appendChild(tasks);
+
+      // Ajouter les ouvriers
+      if(item.workers && item.workers.length>0){
+        const divWorkers = document.createElement('div');
+        divWorkers.className = 'workers';
+        item.workers.forEach(w=>{
+          const imgWorker = document.createElement('img');
+          imgWorker.src = w.photo;
+          imgWorker.alt = w.name[lang] || 'ouvrier';
+          divWorkers.appendChild(imgWorker);
+        });
+        card.appendChild(divWorkers);
+      }
+
+      return card;
+    }
+
+    function escapeHtml(s){ return String(s).replace(/[&<>\\"]/g, c=>({"&":"&amp;","<":"&lt;","~":"~","\"":"&quot;"})[c]); }
+    function placeholderDataURI(text){
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='480'><rect width='100%' height='100%' fill='#072034'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='36' fill='#7fb3d5' font-family='Arial, sans-serif'>${text||''}</text></svg>`;
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+    }
+
+    function render(data){
+      lastData = data;
+      renderLastData();
+    }
+
+    function renderLastData(){
+      clearCards();
+      if(!lastData || !Array.isArray(lastData.entries)){
+        statusEl.textContent = (lang==='fr'?'Aucune donnée valide':'Немає дійсних даних');
+        return;
+      }
+      const now = new Date(); const today = isoDate(now);
+      const tm = new Date(now.getTime() + 24*3600*1000); const tomorrow = isoDate(tm);
+      dateTodayEl.textContent = readableDate(now);
+      dateTomorrowEl.textContent = readableDate(tm);
+
+      const todayItems = lastData.entries.filter(e=>e.date===today);
+      const tomorrowItems = lastData.entries.filter(e=>e.date===tomorrow);
+
+      if(todayItems.length===0){ const p = document.createElement('div'); p.className='small'; p.textContent = lang==='fr'?'Aucun chantier aujourd\'hui':'Немає робіт сьогодні'; cardsToday.appendChild(p);} 
+      else todayItems.forEach(it=>cardsToday.appendChild(createCard(it)));
+
+      if(tomorrowItems.length===0){ const p = document.createElement('div'); p.className='small'; p.textContent = lang==='fr'?'Aucun chantier demain':'Немає робіт завтра'; cardsTomorrow.appendChild(p);} 
+      else tomorrowItems.forEach(it=>cardsTomorrow.appendChild(createCard(it)));
+
+      const nowStr = new Date().toLocaleString();
+      statusEl.textContent = (lang==='fr'?'Dernière mise à jour : ':'Останнє оновлення: ') + nowStr;
+    }
+
+    async function fetchAndRender(force){
+      try{
+        const res = await fetch(DATA_URL + (force?('?t='+Date.now()):''), {cache: 'no-store'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        render(data);
+      }catch(err){
+        statusEl.textContent = (lang==='fr'?'Erreur chargement données: ':'Помилка завантаження даних: ') + err.message;
+        console.error(err);
+      }
+    }
+
+    fetchAndRender(false);
+    setInterval(()=>{ fetchAndRender(false); }, POLL_INTERVAL);
+  </script>
+</body>
+</html>

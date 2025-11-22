@@ -1,0 +1,16 @@
+{
+  "meta": { "site": "Планування працівників", "updated_by": "Nicolas" },
+  "entries": [
+    {
+      "id": "c1",
+      "date": "2025-11-16",
+      "site": { "fr": "Chantier A - Bâtiment 1", "uk": "Будівництво A - Будинок 1" },
+      "image": "images/chantier-a.jpg",
+      "tasks": { "fr": ["Préparer coffrage","Percer points d'ancrage"], "uk": ["Підготувати опалубку","Просвердлити точки кріплення"] },
+      "workers": [
+        { "name": { "fr": "John", "uk": "Джон" }, "photo": "images/ouvrier-john.jpg" },
+        { "name": { "fr": "Anna", "uk": "Анна" }, "photo": "images/ouvrier-anna.jpg" }
+      ]
+    }
+  ]
+}
