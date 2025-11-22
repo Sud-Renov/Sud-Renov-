@@ -2,416 +2,126 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin planning — Glisser-déposer ouvriers → chantiers</title>
+  <title>Admin planning — Glisser-déposer</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --panel: #111827;
-      --panel2: #1f2937;
-      --border: #334155;
-      --text: #f8fafc;
-      --muted: #cbd5e1;
-      --accent: #60a5fa;
-      --ok: #10b981;
-      --warn: #f59e0b;
-    }
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans', Arial, sans-serif; }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: 340px 1fr; gap: 16px; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; margin: 16px auto; max-width: 1200px; }
-    h1 { font-size: 1.4rem; margin: 0; }
-    .btn { background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-    .btn:hover { border-color: var(--accent); }
-    .sidebar, .main { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
-    .section-title { font-weight: 700; margin: 8px 0 12px; }
-    .list { display: grid; gap: 8px; }
-    .chip { background: var(--panel2); border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: grab; }
-    .chip:active { cursor: grabbing; }
-    .chip small { color: var(--muted); }
-    .site { background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: grid; grid-template-columns: 160px 1fr; }
-    .thumb { width: 160px; height: 120px; object-fit: cover; background: #0b1220; }
-    .site-body { padding: 10px; display: grid; gap: 6px; }
-    .site-title { font-weight: 700; }
-    .row { display: flex; align-items: center; gap: 8px; color: var(--muted); }
-    .droppable { min-height: 44px; display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px dashed #3b82f6; border-radius: 8px; background: rgba(96,165,250,0.08); }
-    .droppable.dragover { background: rgba(96,165,250,0.18); }
-    .worker { background: #0b3b5c; border: 1px solid #2563eb; border-radius: 999px; padding: 6px 10px; display: inline-flex; align-items: center; gap: 8px; }
-    .worker .remove { background: transparent; border: none; color: #93c5fd; cursor: pointer; font-weight: 700; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
-    .inputs { display: grid; gap: 8px; }
-    input, select { background: var(--panel2); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 8px; }
-    .topbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 0.75rem; border: 1px solid var(--border); color: var(--muted); }
-    @media (max-width: 900px) {
-      .wrap { grid-template-columns: 1fr; }
-      .site { grid-template-columns: 1fr; }
-      .thumb { width: 100%; height: 160px; }
-    }
-    * { user-select: none; }
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
+    h1 { margin-bottom:20px; }
+    .wrap { display:flex; gap:20px; }
+    .sidebar, .main { background:#fff; padding:15px; border-radius:8px; flex:1; }
+    .chip { background:#e0e7ff; padding:8px 12px; border-radius:6px; margin:5px 0; cursor:grab; }
+    .chip:active { cursor:grabbing; }
+    .site { border:1px solid #ddd; border-radius:8px; margin-bottom:15px; overflow:hidden; }
+    .site img { width:100%; height:150px; object-fit:cover; }
+    .site-body { padding:10px; }
+    .droppable { min-height:40px; border:2px dashed #60a5fa; padding:8px; border-radius:6px; }
+    .droppable.dragover { background:#dbeafe; }
+    .worker { background:#93c5fd; border-radius:999px; padding:4px 8px; margin:4px; display:inline-block; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Admin planning — glisser-déposer ouvriers vers chantiers</h1>
-    <div class="topbar">
-      <button class="btn" id="addSiteBtn">+ Nouveau chantier</button>
-      <button class="btn" id="addWorkerBtn">+ Nouvel ouvrier</button>
-      <span class="badge" id="statusBadge">Non sauvegardé</span>
-      <button class="btn" id="saveLocalBtn">💾 Sauvegarder (local)</button>
-      <button class="btn" id="exportJsonBtn">⬇️ Exporter JSON</button>
-      <button class="btn" id="copyJsonBtn">📋 Copier JSON</button>
-      <button class="btn" id="loadLocalBtn">↻ Recharger (local)</button>
-    </div>
-  </header>
-
+  <h1>Admin planning — glisser-déposer ouvriers vers chantiers</h1>
   <div class="wrap">
     <aside class="sidebar">
-      <div class="section-title">Ouvriers</div>
-      <div class="inputs">
-        <input id="workerNameInput" placeholder="Nom de l'ouvrier" />
-        <button class="btn" id="createWorkerBtn">Ajouter</button>
-      </div>
-      <div id="workersList" class="list" aria-label="Ouvriers disponibles"></div>
-      <div class="section-title" style="margin-top:14px;">Étiquettes rapides</div>
-      <div class="list" id="quickLabels">
-        <div class="chip" data-label="Équipe A">Équipe A</div>
-        <div class="chip" data-label="Équipe B">Équipe B</div>
-        <div class="chip" data-label="Équipe C">Équipe C</div>
-      </div>
+      <h2>Ouvriers</h2>
+      <input id="workerName" placeholder="Nom de l'ouvrier" />
+      <button onclick="addWorker()">Ajouter</button>
+      <div id="workersList"></div>
     </aside>
 
     <main class="main">
-      <div class="section-title">Chantiers du jour</div>
-      <div class="inputs">
-        <input id="siteTitleFr" placeholder="Titre (FR)" />
-        <input id="siteTitleUk" placeholder="Заголовок (UK)" />
-        <input id="siteAddressFr" placeholder="Adresse (FR)" />
-        <input id="siteAddressUk" placeholder="Адреса (UK)" />
-        <input id="siteStart" placeholder="Heure de début (ex. 08:00)" />
-        <input id="sitePhoto" placeholder="Chemin photo (ex. images/chantier.jpg)" />
-      </div>
-      <div style="margin-top:8px;">
-        <button class="btn" id="createSiteBtn">Ajouter chantier</button>
-        <button class="btn" id="clearAllBtn">Vider tout</button>
-      </div>
-
-      <div id="sitesGrid" class="grid" style="margin-top:12px;"></div>
+      <h2>Chantiers du jour</h2>
+      <input id="siteTitle" placeholder="Titre du chantier" />
+      <input id="siteAddress" placeholder="Adresse" />
+      <input id="siteStart" placeholder="Heure de début (ex: 08:00)" />
+      <input id="sitePhoto" placeholder="Chemin photo (ex: images/chantier.jpg)" />
+      <button onclick="addSite()">Ajouter chantier</button>
+      <div id="sitesGrid"></div>
     </main>
   </div>
 
   <script>
-    // Etat
-    let state = {
-      workers: [
-        { id: id(), name: "Ouvrier 1" },
-        { id: id(), name: "Ouvrier 2" },
-        { id: id(), name: "Ouvrier 3" }
-      ],
-      sites: [
-        sampleSite("Chantier: Rénovation de façade", "Будмайданчик: Ремонт фасаду", "Marseille, 13008", "Марсель, 13008", "08:00", "images/facade.jpg"),
-        sampleSite("Installation plomberie", "Монтаж сантехніки", "Allauch, 13190", "Алло, 13190", "09:30", "images/plomberie.jpg")
-      ]
-    };
-    let dirty = false;
+    let workers = [];
+    let sites = [];
 
-    function id() { return Math.random().toString(36).slice(2, 9); }
-    function sampleSite(fr, uk, afr, auk, start, photo) {
-      return {
-        id: id(),
-        title: { fr, uk },
-        address: { fr: afr, uk: auk },
-        start,
-        photo,
-        crew: [], // liste d'IDs d'ouvriers affectés
-        status: "ok"
-      };
+    function renderWorkers() {
+      const list = document.getElementById("workersList");
+      list.innerHTML = "";
+      workers.forEach(w => {
+        const div = document.createElement("div");
+        div.className = "chip";
+        div.textContent = w.name;
+        div.draggable = true;
+        div.dataset.id = w.id;
+        div.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("text/plain", w.id);
+        });
+        list.appendChild(div);
+      });
     }
 
-    // Elements
-    const els = {
-      workersList: document.getElementById("workersList"),
-      sitesGrid: document.getElementById("sitesGrid"),
-      workerNameInput: document.getElementById("workerNameInput"),
-      createWorkerBtn: document.getElementById("createWorkerBtn"),
-      addWorkerBtn: document.getElementById("addWorkerBtn"),
-      addSiteBtn: document.getElementById("addSiteBtn"),
-      siteTitleFr: document.getElementById("siteTitleFr"),
-      siteTitleUk: document.getElementById("siteTitleUk"),
-      siteAddressFr: document.getElementById("siteAddressFr"),
-      siteAddressUk: document.getElementById("siteAddressUk"),
-      siteStart: document.getElementById("siteStart"),
-      sitePhoto: document.getElementById("sitePhoto"),
-      createSiteBtn: document.getElementById("createSiteBtn"),
-      clearAllBtn: document.getElementById("clearAllBtn"),
-      saveLocalBtn: document.getElementById("saveLocalBtn"),
-      loadLocalBtn: document.getElementById("loadLocalBtn"),
-      exportJsonBtn: document.getElementById("exportJsonBtn"),
-      copyJsonBtn: document.getElementById("copyJsonBtn"),
-      statusBadge: document.getElementById("statusBadge"),
-    };
-
-    // Rendu
-    function render() {
-      els.workersList.innerHTML = "";
-      state.workers.forEach(w => {
-        const chip = document.createElement("div");
-        chip.className = "chip";
-        chip.draggable = true;
-        chip.dataset.workerId = w.id;
-        chip.innerHTML = `<span>${w.name}</span><small>Drag</small>`;
-        chip.addEventListener("dragstart", onDragStart);
-        els.workersList.appendChild(chip);
-      });
-
-      els.sitesGrid.innerHTML = "";
-      state.sites.forEach(site => {
-        const article = document.createElement("article");
-        article.className = "site";
-        article.innerHTML = `
-          <img class="thumb" src="${site.photo || 'images/placeholder.jpg'}" alt="${site.title.fr}" />
+    function renderSites() {
+      const grid = document.getElementById("sitesGrid");
+      grid.innerHTML = "";
+      sites.forEach(site => {
+        const card = document.createElement("div");
+        card.className = "site";
+        card.innerHTML = `
+          <img src="${site.photo || 'images/placeholder.jpg'}" alt="${site.title}">
           <div class="site-body">
-            <div class="site-title">${site.title.fr}</div>
-            <div class="row">🏠 Adresse (FR): ${site.address.fr}</div>
-            <div class="row">🕗 Début: ${site.start || "—"}</div>
-            <div class="row">🗣️ Titre (UK): ${site.title.uk}</div>
-            <div class="row">📍 Адреса (UK): ${site.address.uk}</div>
-            <div class="row">👷 Ouvriers affectés:</div>
-            <div class="droppable" data-site-id="${site.id}" aria-label="Zone de dépôt ouvriers"></div>
-            <div class="row" style="gap:6px;">
-              <button class="btn" data-edit-id="${site.id}">✎ Modifier</button>
-              <button class="btn" data-delete-id="${site.id}">🗑️ Supprimer</button>
-              <span class="badge">${site.status}</span>
-            </div>
+            <strong>${site.title}</strong><br>
+            📍 ${site.address}<br>
+            🕗 ${site.start}<br>
+            <div class="droppable" data-id="${site.id}"></div>
           </div>
         `;
-        els.sitesGrid.appendChild(article);
-
-        const dropzone = article.querySelector(".droppable");
-        dropzone.addEventListener("dragover", onDragOver);
-        dropzone.addEventListener("dragleave", onDragLeave);
-        dropzone.addEventListener("drop", onDrop);
-
-        // Rendu des ouvriers affectés
-        site.crew.forEach(workerId => {
-          const worker = state.workers.find(w => w.id === workerId);
-          if (!worker) return;
-          const pill = document.createElement("span");
-          pill.className = "worker";
-          pill.innerHTML = `${worker.name} <button class="remove" title="Retirer">×</button>`;
-          pill.querySelector(".remove").addEventListener("click", () => {
-            site.crew = site.crew.filter(id => id !== workerId);
-            markDirty(); render();
-          });
-          dropzone.appendChild(pill);
-        });
-
-        // Boutons modifier/supprimer
-        article.querySelector(`[data-edit-id="${site.id}"]`).addEventListener("click", () => editSite(site));
-        article.querySelector(`[data-delete-id="${site.id}"]`).addEventListener("click", () => {
-          state.sites = state.sites.filter(s => s.id !== site.id);
-          markDirty(); render();
-        });
-      });
-
-      els.statusBadge.textContent = dirty ? "Modifications non sauvegardées" : "À jour";
-    }
-
-    // Drag & drop
-    function onDragStart(e) {
-      const id = e.target.dataset.workerId;
-      e.dataTransfer.setData("text/plain", id);
-    }
-    function onDragOver(e) {
-      e.preventDefault();
-      e.currentTarget.classList.add("dragover");
-    }
-    function onDragLeave(e) {
-      e.currentTarget.classList.remove("dragover");
-    }
-    function onDrop(e) {
-      e.preventDefault();
-      e.currentTarget.classList.remove("dragover");
-      const workerId = e.dataTransfer.getData("text/plain");
-      const siteId = e.currentTarget.dataset.siteId;
-      const site = state.sites.find(s => s.id === siteId);
-      if (!site) return;
-      if (!site.crew.includes(workerId)) {
-        site.crew.push(workerId);
-        markDirty(); render();
-      }
-    }
-
-    // Création ouvriers
-    els.createWorkerBtn.addEventListener("click", () => {
-      const name = els.workerNameInput.value.trim();
-      if (!name) return;
-      state.workers.push({ id: id(), name });
-      els.workerNameInput.value = "";
-      markDirty(); render();
-    });
-    // Raccourci bouton topbar
-    els.addWorkerBtn.addEventListener("click", () => {
-      const name = prompt("Nom du nouvel ouvrier ?");
-      if (!name) return;
-      state.workers.push({ id: id(), name });
-      markDirty(); render();
-    });
-
-    // Ajout chantier
-    function createSiteFromInputs() {
-      const fr = els.siteTitleFr.value.trim();
-      const uk = els.siteTitleUk.value.trim();
-      const afr = els.siteAddressFr.value.trim();
-      const auk = els.siteAddressUk.value.trim();
-      const start = els.siteStart.value.trim();
-      const photo = els.sitePhoto.value.trim();
-      if (!fr || !afr) { alert("Titre (FR) et Adresse (FR) sont requis."); return; }
-      state.sites.push({
-        id: id(),
-        title: { fr, uk },
-        address: { fr: afr, uk: auk },
-        start,
-        photo,
-        crew: [],
-        status: "ok"
-      });
-      els.siteTitleFr.value = ""; els.siteTitleUk.value = ""; els.siteAddressFr.value = "";
-      els.siteAddressUk.value = ""; els.siteStart.value = ""; els.sitePhoto.value = "";
-      markDirty(); render();
-    }
-    els.createSiteBtn.addEventListener("click", createSiteFromInputs);
-    els.addSiteBtn.addEventListener("click", () => {
-      els.siteTitleFr.focus();
-      createSiteFromInputs();
-    });
-
-    // Edit site
-    function editSite(site) {
-      const fr = prompt("Titre (FR):", site.title.fr) ?? site.title.fr;
-      const uk = prompt("Titre (UK):", site.title.uk) ?? site.title.uk;
-      const afr = prompt("Adresse (FR):", site.address.fr) ?? site.address.fr;
-      const auk = prompt("Адреса (UK):", site.address.uk) ?? site.address.uk;
-      const start = prompt("Début (HH:MM):", site.start) ?? site.start;
-      const photo = prompt("Photo (chemin):", site.photo) ?? site.photo;
-      const status = prompt('Statut ("ok" ou "warn"):', site.status) ?? site.status;
-      site.title.fr = fr; site.title.uk = uk;
-      site.address.fr = afr; site.address.uk = auk;
-      site.start = start; site.photo = photo; site.status = status;
-      markDirty(); render();
-    }
-
-    // Quick labels
-    document.getElementById("quickLabels").querySelectorAll(".chip").forEach(el => {
-      el.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", "LABEL|" + e.target.dataset.label);
-      });
-    });
-    // Dropping label adds a virtual "worker" tag
-    function onDropLabel(e, label) {
-      const siteId = e.currentTarget.dataset.siteId;
-      const site = state.sites.find(s => s.id === siteId);
-      if (!site) return;
-      // On ajoute un pseudo worker avec nom = label (non persisté dans workers)
-      const pseudoId = "lbl-" + label;
-      if (!site.crew.includes(pseudoId)) {
-        site.crew.push(pseudoId);
-        markDirty(); render();
-      }
-    }
-    // Intercepter drop pour label
-    document.addEventListener("drop", function(e) {
-      const data = e.dataTransfer?.getData("text/plain") || "";
-      if (data.startsWith("LABEL|")) {
-        const label = data.split("|")[1];
-        // trouver dropzone sous le curseur
-        const elem = document.elementFromPoint(e.clientX, e.clientY);
-        const zone = elem?.closest?.(".droppable");
-        if (zone) {
+        const dropzone = card.querySelector(".droppable");
+        dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
+        dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+        dropzone.addEventListener("drop", e => {
           e.preventDefault();
-          const siteId = zone.dataset.siteId;
-          const site = state.sites.find(s => s.id === siteId);
-          if (!site) return;
-          const pseudoId = "lbl-" + label;
-          if (!site.crew.includes(pseudoId)) {
-            site.crew.push(pseudoId);
-            markDirty(); render();
+          dropzone.classList.remove("dragover");
+          const workerId = e.dataTransfer.getData("text/plain");
+          const worker = workers.find(w => w.id === workerId);
+          if (worker) {
+            site.crew.push(worker.name);
+            renderSites();
           }
-        }
-      }
-    }, false);
-
-    // Persistance locale
-    function markDirty() { dirty = true; els.statusBadge.textContent = "Modifications non sauvegardées"; }
-    function saveLocal() {
-      localStorage.setItem("planning_admin_state", JSON.stringify(state));
-      dirty = false; els.statusBadge.textContent = "À jour (sauvé local)";
-    }
-    function loadLocal() {
-      const raw = localStorage.getItem("planning_admin_state");
-      if (!raw) return;
-      try {
-        const data = JSON.parse(raw);
-        // Nettoyage: garder format attendu
-        state.workers = Array.isArray(data.workers) ? data.workers : state.workers;
-        state.sites = Array.isArray(data.sites) ? data.sites : state.sites;
-        dirty = false;
-      } catch(e) {}
-      render();
-    }
-    els.saveLocalBtn.addEventListener("click", saveLocal);
-    els.loadLocalBtn.addEventListener("click", loadLocal);
-
-    // Export JSON pour index.html
-    function toPlanningJson() {
-      // Convertit l'état vers le format consommé par index.html
-      return state.sites.map(site => {
-        // Résoudre crew: transformer IDs -> noms
-        const names = site.crew.map(id => {
-          if (id.startsWith("lbl-")) return id.replace("lbl-", ""); // labels rapides
-          const w = state.workers.find(x => x.id === id);
-          return w ? w.name : id;
-        }).join(" / ");
-        return {
-          title: site.title,
-          address: site.address,
-          start: site.start || "",
-          crew: names || "",
-          status: site.status || "ok",
-          photo: site.photo || "images/placeholder.jpg"
-        };
+        });
+        site.crew.forEach(name => {
+          const span = document.createElement("span");
+          span.className = "worker";
+          span.textContent = name;
+          dropzone.appendChild(span);
+        });
+        grid.appendChild(card);
       });
     }
-    function download(filename, text) {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([text], {type: 'application/json'}));
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
-    els.exportJsonBtn.addEventListener("click", () => {
-      const json = JSON.stringify(toPlanningJson(), null, 2);
-      download("planning.json", json);
-    });
-    els.copyJsonBtn.addEventListener("click", async () => {
-      const json = JSON.stringify(toPlanningJson(), null, 2);
-      try {
-        await navigator.clipboard.writeText(json);
-        els.statusBadge.textContent = "JSON copié";
-      } catch(e) {
-        alert("Copie impossible. Sélectionne et copie manuellement.");
-      }
-    });
 
-    // Vider tout
-    els.clearAllBtn.addEventListener("click", () => {
-      if (!confirm("Tout effacer (ouvriers et chantiers) ?")) return;
-      state = { workers: [], sites: [] };
-      markDirty(); render();
-    });
+    function addWorker() {
+      const name = document.getElementById("workerName").value.trim();
+      if (!name) return;
+      workers.push({ id: Math.random().toString(36).slice(2,9), name });
+      document.getElementById("workerName").value = "";
+      renderWorkers();
+    }
+
+    function addSite() {
+      const title = document.getElementById("siteTitle").value.trim();
+      const address = document.getElementById("siteAddress").value.trim();
+      const start = document.getElementById("siteStart").value.trim();
+      const photo = document.getElementById("sitePhoto").value.trim();
+      if (!title || !address) return;
+      sites.push({ id: Math.random().toString(36).slice(2,9), title, address, start, photo, crew: [] });
+      document.getElementById("siteTitle").value = "";
+      document.getElementById("siteAddress").value = "";
+      document.getElementById("siteStart").value = "";
+      document.getElementById("sitePhoto").value = "";
+      renderSites();
+    }
 
     // Init
-    render();
-    loadLocal();
+    renderWorkers();
+    renderSites();
   </script>
 </body>
 </html>
