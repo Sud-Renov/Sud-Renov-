@@ -1,16 +1,18 @@
-{
-  "meta": { "site": "Планування працівників", "updated_by": "Nicolas" },
-  "entries": [
-    {
-      "id": "c1",
-      "date": "2025-11-16",
-      "site": { "fr": "Chantier A - Bâtiment 1", "uk": "Будівництво A - Будинок 1" },
-      "image": "images/chantier-a.jpg",
-      "tasks": { "fr": ["Préparer coffrage","Percer points d'ancrage"], "uk": ["Підготувати опалубку","Просвердлити точки кріплення"] },
-      "workers": [
-        { "name": { "fr": "John", "uk": "Джон" }, "photo": "images/ouvrier-john.jpg" },
-        { "name": { "fr": "Anna", "uk": "Анна" }, "photo": "images/ouvrier-anna.jpg" }
-      ]
-    }
-  ]
-}
+[
+  {
+    "title": { "uk": "Будмайданчик: Ремонт фасаду", "fr": "Chantier: Rénovation de façade" },
+    "address": { "uk": "Марсель, 13008", "fr": "Marseille, 13008" },
+    "start": "08:00",
+    "crew": "Бригада A / Équipe A",
+    "status": "ok",
+    "photo": "images/facade.jpg"
+  },
+  {
+    "title": { "uk": "Монтаж сантехніки", "fr": "Installation plomberie" },
+    "address": { "uk": "Алло, 13190", "fr": "Allauch, 13190" },
+    "start": "09:30",
+    "crew": "Бригада B / Équipe B",
+    "status": "warn",
+    "photo": "images/plomberie.jpg"
+  }
+]
