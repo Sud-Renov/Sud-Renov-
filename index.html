@@ -87,6 +87,10 @@
 <h1>Planning du jour</h1>
 <div id="sitesGrid" class="grid"></div>
 
+<div class="marquee">
+  <span>🚧 Organisation des chantiers - données générées depuis admin.html 🚧</span>
+</div>
+
 <script>
 let sites = [];
 
@@ -99,17 +103,18 @@ function renderSites() {
     card.className = "site";
 
     card.innerHTML = `
-      <h2>${site.title.fr}</h2>
-      <p>📍 ${site.address.fr}</p>
-      <p>📝 ${site.notes || ""}</p>
       ${site.photo ? `<img src="${site.photo}" alt="Photo chantier">` : ""}
+      <div class="site-body">
+        <strong>${site.title.fr}</strong><br>
+        📍 ${site.address.fr}<br>
+        📝 ${site.notes || ""}<br>
+      </div>
     `;
 
     const crewDiv = document.createElement("div");
     crewDiv.className = "crew";
     (site.crew || []).forEach(c => {
       const span = document.createElement("span");
-      span.className = "tag";
       span.textContent = (c.type === "ouvrier" ? "👷 " : "🛠️ ") + c.name;
       crewDiv.appendChild(span);
     });
