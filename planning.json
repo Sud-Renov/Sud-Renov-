@@ -1,45 +1,66 @@
 [
   {
-    "id": "site6rlkk0l",
-    "title": {
-      "fr": "rtrt",
-      "uk": "rtrt"
-    },
-    "address": {
-      "fr": "trt",
-      "uk": "trt"
-    },
-    "start": "rtrt",
-    "photo": "rtrt",
+    "id": "site1",
+    "title": { "fr": "Rénovation façade", "uk": "Ремонт фасаду" },
+    "address": { "fr": "Marseille, 13008", "uk": "Марсель, 13008" },
+    "start": "08:00",
+    "photo": "images/facade.jpg",
     "crew": [
-      {
-        "type": "ouvrier",
-        "name": "gfgf"
-      },
-      {
-        "type": "tache",
-        "name": "fgfgf"
-      }
+      { "type": "ouvrier", "name": "Jean" },
+      { "type": "ouvrier", "name": "Olivier" },
+      { "type": "tache", "name": "Carrelage" }
     ],
     "status": "ok"
   },
   {
-    "id": "sitebbzreyj",
-    "title": {
-      "fr": "sqdd",
-      "uk": "sqdd"
-    },
-    "address": {
-      "fr": "sdsd",
-      "uk": "sdsd"
-    },
-    "start": "sdsd",
-    "photo": "sds",
+    "id": "site2",
+    "title": { "fr": "Installation plomberie", "uk": "Монтаж сантехніки" },
+    "address": { "fr": "Allauch, 13190", "uk": "Алло, 13190" },
+    "start": "09:30",
+    "photo": "images/plomberie.jpg",
     "crew": [
-      {
-        "type": "ouvrier",
-        "name": "sdsd"
-      }
+      { "type": "ouvrier", "name": "Nicolas" },
+      { "type": "ouvrier", "name": "Yvan" },
+      { "type": "tache", "name": "Plomberie" }
+    ],
+    "status": "ok"
+  },
+  {
+    "id": "site3",
+    "title": { "fr": "Pose toiture", "uk": "Монтаж даху" },
+    "address": { "fr": "Aix-en-Provence, 13100", "uk": "Екс-ан-Прованс, 13100" },
+    "start": "07:45",
+    "photo": "images/toiture.jpg",
+    "crew": [
+      { "type": "ouvrier", "name": "Michel" },
+      { "type": "ouvrier", "name": "Serge" },
+      { "type": "tache", "name": "Couverture" }
+    ],
+    "status": "warn"
+  },
+  {
+    "id": "site4",
+    "title": { "fr": "Électricité bureaux", "uk": "Електрика офісів" },
+    "address": { "fr": "Vitrolles, 13127", "uk": "Вітроль, 13127" },
+    "start": "10:15",
+    "photo": "images/electricite.jpg",
+    "crew": [
+      { "type": "ouvrier", "name": "Patrick" },
+      { "type": "ouvrier", "name": "Luc" },
+      { "type": "tache", "name": "Électricité" }
+    ],
+    "status": "ok"
+  },
+  {
+    "id": "site5",
+    "title": { "fr": "Peinture intérieure", "uk": "Внутрішнє фарбування" },
+    "address": { "fr": "Gardanne, 13120", "uk": "Гарданн, 13120" },
+    "start": "13:00",
+    "photo": "images/peinture.jpg",
+    "crew": [
+      { "type": "ouvrier", "name": "David" },
+      { "type": "ouvrier", "name": "Paul" },
+      { "type": "tache", "name": "Peinture" }
     ],
     "status": "ok"
   }

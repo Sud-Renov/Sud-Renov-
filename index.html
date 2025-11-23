@@ -13,4 +13,76 @@
   .site { min-width:100%; box-sizing:border-box; background:#1f2937; border-radius:12px; overflow:hidden; }
   .site img { width:100%; height:220px; object-fit:cover; }
   .site-body { padding:16px; }
-  .site-body strong { font-size:1.4rem; color:#facc15;
+  .site-body strong { font-size:1.4rem; color:#facc15; }
+  .crew { margin-top:10px; font-size:1rem; color:#93c5fd; }
+</style>
+</head>
+<body>
+<h1>📋 Планування на день</h1>
+<div class="lang-toggle">
+  <button onclick="toggleLang()">🌐 Перемкнути FR / UK</button>
+</div>
+<div class="carousel">
+  <div class="slides" id="slides"></div>
+</div>
+
+<script>
+let currentIndex = 0;
+let currentLang = "uk"; // ✅ langue par défaut
+
+function afficherPlanning() {
+  fetch("planning.json?ts=" + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      const slides = document.getElementById("slides");
+      slides.innerHTML = "";
+      data.forEach(site => {
+        const card = document.createElement("div");
+        card.className = "site";
+        card.innerHTML = `
+          <img src="${site.photo || 'images/placeholder.jpg'}" alt="${site.title[currentLang]}">
+          <div class="site-body">
+            <strong>${site.title[currentLang]}</strong><br>
+            📍 ${site.address[currentLang]}<br>
+            🕗 ${site.start}<br>
+            <div class="crew">
+              ${site.crew.map(c => (c.type==="ouvrier"?"👷 ":"🛠️ ")+c.name).join(" / ")}
+            </div>
+          </div>
+        `;
+        slides.appendChild(card);
+      });
+      currentIndex = 0;
+      updateCarousel();
+    })
+    .catch(err => {
+      document.getElementById("slides").innerHTML = "<p style='color:red'>Erreur de lecture du planning.json</p>";
+      console.error("Erreur JSON :", err);
+    });
+}
+
+function updateCarousel() {
+  const slides = document.getElementById("slides");
+  const total = slides.children.length;
+  if (total > 0) {
+    slides.style.transform = `translateX(-${currentIndex * 100}%)`;
+    currentIndex = (currentIndex + 1) % total;
+  }
+}
+
+function toggleLang() {
+  currentLang = currentLang === "fr" ? "uk" : "fr";
+  afficherPlanning();
+}
+
+// Premier affichage
+afficherPlanning();
+
+// Rafraîchit toutes les minutes
+setInterval(afficherPlanning, 60000);
+
+// Défilement automatique toutes les 8 secondes
+setInterval(updateCarousel, 8000);
+</script>
+</body>
+</html>

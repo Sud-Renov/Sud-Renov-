@@ -29,6 +29,9 @@
   <button type="button" onclick="addTask()">Ajouter</button>
   <div id="tasksList"></div>
 
+  <h3>JSON</h3>
+  <input type="file" id="importFile" accept="application/json">
+  <button type="button" onclick="importJSON()">📂 Importer JSON</button>
   <button type="button" onclick="exportJSON()">⬇️ Exporter JSON</button>
 </div>
 
@@ -177,6 +180,34 @@ function exportJSON() {
   a.click();
   URL.revokeObjectURL(a.href);
 }
-</script>
-</body>
-</html>
+
+function importJSON() {
+  const fileInput = document.getElementById("importFile");
+  const file = fileInput.files[0];
+  if (!file) {
+    alert("Sélectionne un fichier planning.json");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      sites = data;
+      workers = [];
+      tasks = [];
+      sites.forEach(site => {
+        site.crew.forEach(c => {
+          if (c.type === "ouvrier" && !workers.includes(c.name)) {
+            workers.push(c.name);
+          }
+          if (c.type === "tache" && !tasks.includes(c.name)) {
+            tasks.push(c.name);
+          }
+        });
+      });
+      document.getElementById("workersList").innerHTML="";
+      workers.forEach(w => document.getElementById("workersList").appendChild(makeChip("ouvrier", w)));
+      document.getElementById("tasksList").innerHTML="";
+      tasks.forEach(t => document.getElementById("tasksList").appendChild(makeChip("tache", t)));
+      renderSites();
+      alert("
