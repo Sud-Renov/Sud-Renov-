@@ -12,6 +12,7 @@
   .droppable { min-height:40px; border:2px dashed #60a5fa; padding:8px; border-radius:6px; margin-top:8px; }
   .droppable.dragover { background:#dbeafe; }
   .tag { background:#93c5fd; border-radius:999px; padding:4px 8px; margin:4px; display:inline-block; }
+  .removeBtn { margin-left:6px; background:transparent; border:none; cursor:pointer; color:red; font-weight:bold; }
   button { background:#2563eb; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; margin-top:5px; }
   button:hover { background:#1e40af; }
 </style>
@@ -50,23 +51,6 @@ let workers = [];
 let tasks = [];
 let sites = [];
 
-// Traduction FR -> UK via LibreTranslate avec fallback
-async function translateToUk(textFr) {
-  try {
-    const response = await fetch("https://libretranslate.de/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ q: textFr, source: "fr", target: "uk", format: "text" })
-    });
-    if (!response.ok) throw new Error("API non disponible");
-    const data = await response.json();
-    return data.translatedText || textFr;
-  } catch (err) {
-    console.warn("Traduction indisponible, fallback FR :", err);
-    return textFr;
-  }
-}
-
 function makeChip(type, name) {
   const div = document.createElement("div");
   div.className = "chip";
@@ -98,7 +82,7 @@ function addTask() {
   input.value="";
 }
 
-async function addSite() {
+function addSite() {
   const btn = document.getElementById("addSiteBtn");
   const titleFr = document.getElementById("siteTitleFr").value.trim();
   const addressFr = document.getElementById("siteAddressFr").value.trim();
@@ -110,19 +94,11 @@ async function addSite() {
     return;
   }
 
-  btn.disabled = true;
-  btn.textContent = "Ajout en cours…";
-
-  const [titleUk, addressUk] = await Promise.all([
-    translateToUk(titleFr),
-    translateToUk(addressFr)
-  ]);
-
   const id = "site" + Math.random().toString(36).slice(2,9);
   sites.push({
     id,
-    title: { fr: titleFr, uk: titleUk },
-    address: { fr: addressFr, uk: addressUk },
+    title: { fr: titleFr },
+    address: { fr: addressFr },
     start,
     photo,
     crew: [],
@@ -135,8 +111,6 @@ async function addSite() {
   document.getElementById("siteAddressFr").value="";
   document.getElementById("siteStart").value="";
   document.getElementById("sitePhoto").value="";
-  btn.disabled = false;
-  btn.textContent = "Ajouter chantier";
 }
 
 function renderSites() {
@@ -160,12 +134,25 @@ function renderSites() {
       site.crew.push(data);
       renderSites();
     });
-    site.crew.forEach(c=>{
+
+    // 🔹 Affichage des ouvriers/tâches avec croix de suppression
+    site.crew.forEach((c, idx)=>{
       const span=document.createElement("span");
       span.className="tag";
       span.textContent=(c.type==="ouvrier"?"👷 ":"🛠️ ")+c.name;
+
+      const removeBtn=document.createElement("button");
+      removeBtn.textContent="❌";
+      removeBtn.className="removeBtn";
+      removeBtn.onclick=()=>{
+        site.crew.splice(idx,1); // supprime l'élément
+        renderSites();           // rafraîchit l'affichage
+      };
+
+      span.appendChild(removeBtn);
       dropzone.appendChild(span);
     });
+
     grid.appendChild(card);
   });
 }
