@@ -31,14 +31,15 @@
     border-radius:6px;
     cursor:pointer;
     font-weight:bold;
+    font-size:1rem;
   }
   .grid {
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap:20px;
-    max-width:1000px; /* limite la largeur pour centrer */
+    max-width:1000px;
     width:100%;
-    justify-items:center; /* centre les cartes dans la grille */
+    justify-items:center;
   }
   .site {
     background:#1f2937;
@@ -84,7 +85,7 @@
 <body>
 <h1>📋 Планування на день</h1>
 <div class="lang-toggle">
-  <button onclick="toggleLang()">🌐 Перемкнути FR / UA</button>
+  <button id="langBtn" onclick="toggleLang()">🇫🇷 Français</button>
 </div>
 <div class="grid" id="planning"></div>
 
@@ -123,7 +124,13 @@ function afficherPlanning() {
 }
 
 function toggleLang() {
-  currentLang = currentLang === "fr" ? "uk" : "fr";
+  if (currentLang === "uk") {
+    currentLang = "fr";
+    document.getElementById("langBtn").textContent = "🇺🇦 Українська";
+  } else {
+    currentLang = "uk";
+    document.getElementById("langBtn").textContent = "🇫🇷 Français";
+  }
   afficherPlanning();
 }
 
