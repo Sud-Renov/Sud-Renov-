@@ -68,7 +68,7 @@ function makeChip(type, name) {
   editBtn.textContent = "✏️";
   editBtn.className = "editBtn";
   editBtn.onclick = () => {
-    const newName = prompt("Nouveau nom :", name);
+    const newName = prompt("Nouveau nom :", div.dataset.name);
     if (newName) {
       div.textContent = (type==="ouvrier"?"👷 ":"🛠️ ") + newName;
       div.dataset.name = newName;
@@ -212,3 +212,8 @@ function renderSites() {
 }
 
 function exportJSON() {
+  const json=JSON.stringify(sites,null,2);
+  const blob=new Blob([json],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download
