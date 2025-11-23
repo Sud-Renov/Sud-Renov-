@@ -111,6 +111,17 @@
 let sites = [];
 let currentLang = "uk"; // ukrainien par défaut
 
+function updateTitleByTime() {
+  const hour = new Date().getHours();
+  const pageTitle = document.getElementById("pageTitle");
+
+  if (hour < 20) {
+    pageTitle.textContent = currentLang === "uk" ? "План робіт на день" : "Planning du jour";
+  } else {
+    pageTitle.textContent = currentLang === "uk" ? "План на завтра" : "Planning de demain";
+  }
+}
+
 function renderSites() {
   const grid = document.getElementById("sitesGrid");
   grid.innerHTML = "";
@@ -144,20 +155,18 @@ function renderSites() {
     grid.appendChild(card);
   });
 
-  // Mettre à jour les libellés et le bouton selon la langue
-  const pageTitle = document.getElementById("pageTitle");
+  updateTitleByTime();
+
   const marquee = document.querySelector(".marquee span");
   const langFlag = document.getElementById("langFlag");
   const langLabel = document.getElementById("langLabel");
 
   if (currentLang === "uk") {
-    pageTitle.textContent = "План робіт на день";
     marquee.textContent = "🚧 Планування робіт — дані з admin.html 🚧";
     langFlag.src = "images/fr.png";
     langFlag.alt = "Français";
     langLabel.textContent = "Français";
   } else {
-    pageTitle.textContent = "Planning du jour";
     marquee.textContent = "🚧 Organisation des chantiers — données depuis admin.html 🚧";
     langFlag.src = "images/ua.png";
     langFlag.alt = "Українська";
@@ -170,7 +179,6 @@ function toggleLang() {
   renderSites();
 }
 
-// Charger le JSON exporté par admin.html
 fetch("planning.json?ts=" + Date.now())
   .then(r => {
     if (!r.ok) throw new Error("Impossible de charger planning.json");
