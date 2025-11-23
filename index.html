@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="uk">
 <head>
 <meta charset="utf-8">
-<title>Planning du jour</title>
+<title>План робіт на день</title>
 <style>
   body {
     font-family: "Segoe UI", Arial, sans-serif;
@@ -32,6 +32,9 @@
     cursor:pointer;
     font-weight:bold;
     font-size:1rem;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
   }
   .grid {
     display:grid;
@@ -64,6 +67,7 @@
     margin-top:8px;
     font-size:0.9rem;
     color:#93c5fd;
+    padding:0 12px 12px;
   }
   .marquee {
     width:100%;
@@ -84,36 +88,43 @@
 </head>
 <body>
 
-<h1>Planning du jour</h1>
+<h1 id="pageTitle">План робіт на день</h1>
 
 <div class="lang-toggle">
-  <button onclick="toggleLang()">Changer de langue</button>
+  <button id="langBtn" onclick="toggleLang()">
+    <span id="langFlag">🇺🇦</span>
+    <span id="langLabel">Українська</span>
+  </button>
 </div>
 
 <div id="sitesGrid" class="grid"></div>
 
 <div class="marquee">
-  <span>🚧 Organisation des chantiers - données générées depuis admin.html 🚧</span>
+  <span>🚧 Планування робіт — дані з admin.html 🚧</span>
 </div>
 
 <script>
 let sites = [];
-let currentLang = "fr";
+let currentLang = "uk"; // ukrainien par défaut
 
 function renderSites() {
   const grid = document.getElementById("sitesGrid");
   grid.innerHTML = "";
 
   sites.forEach(site => {
+    const title = site.title?.[currentLang] || site.title?.uk || site.title?.fr || "";
+    const address = site.address?.[currentLang] || site.address?.uk || site.address?.fr || "";
+    const notes = site.notes || "";
+
     const card = document.createElement("div");
     card.className = "site";
 
     card.innerHTML = `
-      ${site.photo ? `<img src="${site.photo}" alt="Photo chantier">` : ""}
+      ${site.photo ? `<img src="${site.photo}" alt="Фото об'єкта">` : ""}
       <div class="site-body">
-        <strong>${site.title[currentLang] || site.title.fr}</strong><br>
-        📍 ${site.address[currentLang] || site.address.fr}<br>
-        📝 ${site.notes || ""}<br>
+        <strong>${title}</strong><br>
+        📍 ${address}<br>
+        📝 ${notes}<br>
       </div>
     `;
 
@@ -128,10 +139,25 @@ function renderSites() {
 
     grid.appendChild(card);
   });
+
+  // Mettre à jour les libellés de la page selon la langue
+  const pageTitle = document.getElementById("pageTitle");
+  const marquee = document.querySelector(".marquee span");
+  if (currentLang === "uk") {
+    pageTitle.textContent = "План робіт на день";
+    marquee.textContent = "🚧 Планування робіт — дані з admin.html 🚧";
+    document.getElementById("langFlag").textContent = "🇺🇦";
+    document.getElementById("langLabel").textContent = "Українська";
+  } else {
+    pageTitle.textContent = "Planning du jour";
+    marquee.textContent = "🚧 Organisation des chantiers — données depuis admin.html 🚧";
+    document.getElementById("langFlag").textContent = "🇫🇷";
+    document.getElementById("langLabel").textContent = "Français";
+  }
 }
 
 function toggleLang() {
-  currentLang = currentLang === "fr" ? "en" : "fr";
+  currentLang = currentLang === "uk" ? "fr" : "uk";
   renderSites();
 }
 
