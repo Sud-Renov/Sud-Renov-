@@ -129,8 +129,27 @@ function renderSites() {
     dropzone.addEventListener("dragover", e=>{e.preventDefault();dropzone.classList.add("dragover");});
     dropzone.addEventListener("dragleave", ()=>dropzone.classList.remove("dragover"));
     dropzone.addEventListener("drop", e=>{
-      e.preventDefault();dropzone.classList.remove("dragover");
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
       const data=JSON.parse(e.dataTransfer.getData("text/plain"));
+
+      // 🔹 Vérifier si l'ouvrier/tâche est déjà sur un autre chantier
+      let dejaAffecte = false;
+      sites.forEach(s => {
+        if (s.id !== site.id) {
+          s.crew.forEach(c => {
+            if (c.type === data.type && c.name === data.name) {
+              dejaAffecte = true;
+            }
+          });
+        }
+      });
+
+      if (dejaAffecte) {
+        alert(`⚠️ Attention, "${data.name}" est déjà sur un autre chantier !`);
+        return; // on ne l'ajoute pas
+      }
+
       site.crew.push(data);
       renderSites();
     });
