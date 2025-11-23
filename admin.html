@@ -30,7 +30,6 @@
   <div id="tasksList"></div>
 
   <h3>JSON</h3>
-  <input type="file" id="importFile" accept="application/json">
   <button type="button" onclick="importJSON()">📂 Importer JSON</button>
   <button type="button" onclick="exportJSON()">⬇️ Exporter JSON</button>
 </div>
@@ -182,16 +181,12 @@ function exportJSON() {
 }
 
 function importJSON() {
-  const fileInput = document.getElementById("importFile");
-  const file = fileInput.files[0];
-  if (!file) {
-    alert("Sélectionne un fichier planning.json");
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
+  fetch("planning.json?ts=" + Date.now())
+    .then(r => {
+      if (!r.ok) throw new Error("Impossible de charger planning.json");
+      return r.json();
+    })
+    .then(data => {
       sites = data;
       workers = [];
       tasks = [];
@@ -210,4 +205,13 @@ function importJSON() {
       document.getElementById("tasksList").innerHTML="";
       tasks.forEach(t => document.getElementById("tasksList").appendChild(makeChip("tache", t)));
       renderSites();
-      alert("
+      alert("✅ Planning importé avec succès !");
+    })
+    .catch(err => {
+      alert("❌ Erreur lors de l'import : " + err.message);
+      console.error(err);
+    });
+}
+</script>
+</body>
+</html>
