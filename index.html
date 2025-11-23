@@ -96,7 +96,7 @@
 
 <div class="lang-toggle">
   <button id="langBtn" onclick="toggleLang()">
-    <img id="langFlag" src="/images/fr.png" alt="Français">
+    <img id="langFlag" src="images/fr.png" alt="Français">
     <span id="langLabel">Français</span>
   </button>
 </div>
@@ -153,13 +153,13 @@ function renderSites() {
   if (currentLang === "uk") {
     pageTitle.textContent = "План робіт на день";
     marquee.textContent = "🚧 Планування робіт — дані з admin.html 🚧";
-    langFlag.src = "/images/fr.png";
+    langFlag.src = "images/fr.png";
     langFlag.alt = "Français";
     langLabel.textContent = "Français";
   } else {
     pageTitle.textContent = "Planning du jour";
     marquee.textContent = "🚧 Organisation des chantiers — données depuis admin.html 🚧";
-    langFlag.src = "/images/ua.png";
+    langFlag.src = "images/ua.png";
     langFlag.alt = "Українська";
     langLabel.textContent = "Українська";
   }
