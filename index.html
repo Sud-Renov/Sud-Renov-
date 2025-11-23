@@ -85,6 +85,11 @@
 <body>
 
 <h1>Planning du jour</h1>
+
+<div class="lang-toggle">
+  <button onclick="toggleLang()">Changer de langue</button>
+</div>
+
 <div id="sitesGrid" class="grid"></div>
 
 <div class="marquee">
@@ -93,6 +98,7 @@
 
 <script>
 let sites = [];
+let currentLang = "fr";
 
 function renderSites() {
   const grid = document.getElementById("sitesGrid");
@@ -105,8 +111,8 @@ function renderSites() {
     card.innerHTML = `
       ${site.photo ? `<img src="${site.photo}" alt="Photo chantier">` : ""}
       <div class="site-body">
-        <strong>${site.title.fr}</strong><br>
-        📍 ${site.address.fr}<br>
+        <strong>${site.title[currentLang] || site.title.fr}</strong><br>
+        📍 ${site.address[currentLang] || site.address.fr}<br>
         📝 ${site.notes || ""}<br>
       </div>
     `;
@@ -122,6 +128,11 @@ function renderSites() {
 
     grid.appendChild(card);
   });
+}
+
+function toggleLang() {
+  currentLang = currentLang === "fr" ? "en" : "fr";
+  renderSites();
 }
 
 // Charger le JSON exporté par admin.html
