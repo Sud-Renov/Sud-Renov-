@@ -36,6 +36,10 @@
     align-items:center;
     gap:8px;
   }
+  .lang-toggle img {
+    width:20px;
+    height:14px;
+  }
   .grid {
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -92,8 +96,8 @@
 
 <div class="lang-toggle">
   <button id="langBtn" onclick="toggleLang()">
-    <span id="langFlag">🇺🇦</span>
-    <span id="langLabel">Українська</span>
+    <img id="langFlag" src="/images/fr.png" alt="Français">
+    <span id="langLabel">Français</span>
   </button>
 </div>
 
@@ -140,19 +144,24 @@ function renderSites() {
     grid.appendChild(card);
   });
 
-  // Mettre à jour les libellés de la page selon la langue
+  // Mettre à jour les libellés et le bouton selon la langue
   const pageTitle = document.getElementById("pageTitle");
   const marquee = document.querySelector(".marquee span");
+  const langFlag = document.getElementById("langFlag");
+  const langLabel = document.getElementById("langLabel");
+
   if (currentLang === "uk") {
     pageTitle.textContent = "План робіт на день";
     marquee.textContent = "🚧 Планування робіт — дані з admin.html 🚧";
-    document.getElementById("langFlag").textContent = "🇺🇦";
-    document.getElementById("langLabel").textContent = "Українська";
+    langFlag.src = "/images/fr.png";
+    langFlag.alt = "Français";
+    langLabel.textContent = "Français";
   } else {
     pageTitle.textContent = "Planning du jour";
     marquee.textContent = "🚧 Organisation des chantiers — données depuis admin.html 🚧";
-    document.getElementById("langFlag").textContent = "🇫🇷";
-    document.getElementById("langLabel").textContent = "Français";
+    langFlag.src = "/images/ua.png";
+    langFlag.alt = "Українська";
+    langLabel.textContent = "Українська";
   }
 }
 
