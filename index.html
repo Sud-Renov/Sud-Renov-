@@ -8,13 +8,15 @@
   h1 { text-align:center; margin-bottom:20px; color:#60a5fa; }
   .lang-toggle { text-align:center; margin-bottom:20px; }
   .lang-toggle button { background:#2563eb; color:#fff; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:bold; }
-  .carousel { position:relative; width:80%; margin:0 auto; overflow:hidden; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.4); }
-  .slides { display:flex; transition:transform 0.8s ease-in-out; }
-  .site { min-width:100%; box-sizing:border-box; background:#1f2937; border-radius:12px; overflow:hidden; }
-  .site img { width:100%; height:220px; object-fit:cover; }
-  .site-body { padding:16px; }
-  .site-body strong { font-size:1.4rem; color:#facc15; }
-  .crew { margin-top:10px; font-size:1rem; color:#93c5fd; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap:20px; }
+  .site { background:#1f2937; border-radius:12px; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.3); }
+  .site img { width:100%; height:140px; object-fit:cover; }
+  .site-body { padding:12px; }
+  .site-body strong { font-size:1.1rem; color:#facc15; }
+  .crew { margin-top:8px; font-size:0.9rem; color:#93c5fd; }
+  .marquee { position:fixed; bottom:0; left:0; width:100%; background:#2563eb; color:#fff; padding:8px; font-weight:bold; overflow:hidden; }
+  .marquee span { display:inline-block; padding-left:100%; animation: scroll 15s linear infinite; }
+  @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 </style>
 </head>
 <body>
@@ -22,20 +24,19 @@
 <div class="lang-toggle">
   <button onclick="toggleLang()">🌐 Перемкнути FR / UK</button>
 </div>
-<div class="carousel">
-  <div class="slides" id="slides"></div>
-</div>
+<div class="grid" id="planning"></div>
+
+<div class="marquee"><span>⚠️ N'oubliez pas de vérifier matériel et outils ⚠️</span></div>
 
 <script>
-let currentIndex = 0;
 let currentLang = "uk"; // ✅ langue par défaut
 
 function afficherPlanning() {
   fetch("planning.json?ts=" + Date.now())
     .then(r => r.json())
     .then(data => {
-      const slides = document.getElementById("slides");
-      slides.innerHTML = "";
+      const zone = document.getElementById("planning");
+      zone.innerHTML = "";
       data.forEach(site => {
         const card = document.createElement("div");
         card.className = "site";
@@ -50,24 +51,13 @@ function afficherPlanning() {
             </div>
           </div>
         `;
-        slides.appendChild(card);
+        zone.appendChild(card);
       });
-      currentIndex = 0;
-      updateCarousel();
     })
     .catch(err => {
-      document.getElementById("slides").innerHTML = "<p style='color:red'>Erreur de lecture du planning.json</p>";
+      document.getElementById("planning").innerHTML = "<p style='color:red'>Erreur de lecture du planning.json</p>";
       console.error("Erreur JSON :", err);
     });
-}
-
-function updateCarousel() {
-  const slides = document.getElementById("slides");
-  const total = slides.children.length;
-  if (total > 0) {
-    slides.style.transform = `translateX(-${currentIndex * 100}%)`;
-    currentIndex = (currentIndex + 1) % total;
-  }
 }
 
 function toggleLang() {
@@ -80,9 +70,6 @@ afficherPlanning();
 
 // Rafraîchit toutes les minutes
 setInterval(afficherPlanning, 60000);
-
-// Défilement automatique toutes les 8 secondes
-setInterval(updateCarousel, 8000);
 </script>
 </body>
 </html>
