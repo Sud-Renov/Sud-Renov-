@@ -42,7 +42,6 @@
   <h2>Chantiers du jour</h2>
   <input id="siteTitleFr" placeholder="Titre (FR)">
   <input id="siteAddressFr" placeholder="Adresse/Ville (FR)">
-  <input id="siteStart" placeholder="Heure de début (ex: 08:00)">
   <input id="sitePhoto" placeholder="Chemin photo (ex: images/chantier.jpg)">
   <button id="addSiteBtn" type="button" onclick="addSite()">Ajouter chantier</button>
 
@@ -70,21 +69,22 @@ function makeChip(type, name) {
   editBtn.textContent = "✏️";
   editBtn.className = "inlineEditBtn";
   editBtn.onclick = () => {
-    const newName = prompt("Nouveau nom :", div.dataset.name);
+    const oldName = div.dataset.name;
+    const newName = prompt("Nouveau nom :", oldName);
     if (newName && newName.trim()) {
       div.dataset.name = newName.trim();
       label.textContent = (type === "ouvrier" ? "👷 " : "🛠️ ") + div.dataset.name;
       // Met à jour la source
       if (type === "ouvrier") {
-        const idx = workers.indexOf(name);
+        const idx = workers.indexOf(oldName);
         if (idx !== -1) workers[idx] = newName.trim();
       } else {
-        const idx = tasks.indexOf(name);
+        const idx = tasks.indexOf(oldName);
         if (idx !== -1) tasks[idx] = newName.trim();
       }
       // Met à jour les affectations existantes
       sites.forEach(s => s.crew.forEach(c => {
-        if (c.type === type && c.name === name) c.name = newName.trim();
+        if (c.type === type && c.name === oldName) c.name = newName.trim();
       }));
       renderSites();
     }
@@ -119,7 +119,6 @@ function addTask() {
 function addSite() {
   const titleFr = document.getElementById("siteTitleFr").value.trim();
   const addressFr = document.getElementById("siteAddressFr").value.trim();
-  const start = document.getElementById("siteStart").value.trim();
   const photo = document.getElementById("sitePhoto").value.trim();
 
   if (!titleFr || !addressFr) {
@@ -132,7 +131,6 @@ function addSite() {
     id,
     title: { fr: titleFr },
     address: { fr: addressFr },
-    start,
     photo,
     crew: [],
     status: "ok"
@@ -140,7 +138,6 @@ function addSite() {
 
   document.getElementById("siteTitleFr").value = "";
   document.getElementById("siteAddressFr").value = "";
-  document.getElementById("siteStart").value = "";
   document.getElementById("sitePhoto").value = "";
 
   renderSites();
@@ -158,7 +155,6 @@ function renderSites() {
     header.innerHTML = `
       <strong>${site.title.fr}</strong><br>
       📍 ${site.address.fr}<br>
-      🕗 ${site.start || ""}<br>
     `;
     card.appendChild(header);
 
@@ -203,4 +199,97 @@ function renderSites() {
     site.crew.forEach((c, idx) => {
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent
+      tag.textContent = (c.type === "ouvrier" ? "👷 " : "🛠️ ") + c.name;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "❌";
+      removeBtn.className = "removeBtn";
+      removeBtn.onclick = () => {
+        site.crew.splice(idx, 1);
+        renderSites();
+      };
+
+      tag.appendChild(removeBtn);
+      dropzone.appendChild(tag);
+    });
+
+    // Bouton ✏️ Éditer chantier
+    const editSiteBtn = document.createElement("button");
+    editSiteBtn.textContent = "✏️ Éditer chantier";
+    editSiteBtn.onclick = () => {
+      const newTitle = prompt("Nouveau titre :", site.title.fr);
+      const newAddress = prompt("Nouvelle adresse/ville :", site.address.fr);
+      const newPhoto = prompt("Nouvelle photo :", site.photo);
+
+      if (newTitle && newTitle.trim()) site.title.fr = newTitle.trim();
+      if (newAddress && newAddress.trim()) site.address.fr = newAddress.trim();
+      if (newPhoto && newPhoto.trim()) site.photo = newPhoto.trim();
+
+      renderSites();
+    };
+    card.appendChild(editSiteBtn);
+
+    grid.appendChild(card);
+  });
+}
+
+function exportJSON() {
+  try {
+    const json = JSON.stringify(sites, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "planning.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    alert("✅ Export effectué (planning.json téléchargé).");
+  } catch (err) {
+    alert("❌ Erreur export : " + err.message);
+    console.error(err);
+  }
+}
+
+function importJSON() {
+  fetch("planning.json?ts=" + Date.now())
+    .then(r => {
+      if (!r.ok) throw new Error("Impossible de charger planning.json");
+      return r.json();
+    })
+    .then(data => {
+      if (!Array.isArray(data)) throw new Error("Format JSON invalide (attendu: tableau de chantiers).");
+      sites = data;
+
+      // Reconstitue ouvriers/tâches à partir des affectations
+      workers = [];
+      tasks = [];
+      const workersList = document.getElementById("workersList");
+      const tasksList = document.getElementById("tasksList");
+      workersList.innerHTML = "";
+      tasksList.innerHTML = "";
+
+      sites.forEach(site => {
+        (site.crew || []).forEach(c => {
+          if (c.type === "ouvrier" && !workers.includes(c.name)) {
+            workers.push(c.name);
+            workersList.appendChild(makeChip("ouvrier", c.name));
+          }
+          if (c.type === "tache" && !tasks.includes(c.name)) {
+            tasks.push(c.name);
+            tasksList.appendChild(makeChip("tache", c.name));
+          }
+        });
+      });
+
+      renderSites();
+      alert("✅ Planning importé avec succès !");
+    })
+    .catch(err => {
+      alert("❌ Erreur lors de l'import : " + err.message);
+      console.error(err);
+    });
+}
+</script>
+</body>
+</html>
