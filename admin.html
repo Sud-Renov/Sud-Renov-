@@ -83,7 +83,6 @@ function addTask() {
 }
 
 function addSite() {
-  const btn = document.getElementById("addSiteBtn");
   const titleFr = document.getElementById("siteTitleFr").value.trim();
   const addressFr = document.getElementById("siteAddressFr").value.trim();
   const start = document.getElementById("siteStart").value.trim();
@@ -134,19 +133,19 @@ function renderSites() {
       const data=JSON.parse(e.dataTransfer.getData("text/plain"));
 
       // 🔹 Vérifier si l'ouvrier/tâche est déjà sur un autre chantier
-      let dejaAffecte = false;
+      let chantierTrouve = null;
       sites.forEach(s => {
         if (s.id !== site.id) {
           s.crew.forEach(c => {
             if (c.type === data.type && c.name === data.name) {
-              dejaAffecte = true;
+              chantierTrouve = s.title.fr; // on mémorise le nom du chantier
             }
           });
         }
       });
 
-      if (dejaAffecte) {
-        alert(`⚠️ Attention, "${data.name}" est déjà sur un autre chantier !`);
+      if (chantierTrouve) {
+        alert(`⚠️ Attention, "${data.name}" est déjà affecté au chantier "${chantierTrouve}" !`);
         return; // on ne l'ajoute pas
       }
 
