@@ -84,14 +84,14 @@
 <body>
 <h1>📋 Планування на день</h1>
 <div class="lang-toggle">
-  <button onclick="toggleLang()">🌐 Перемкнути FR / UK</button>
+  <button onclick="toggleLang()">🌐 Перемкнути FR / UA</button>
 </div>
 <div class="grid" id="planning"></div>
 
-<div class="marquee"><span>⚠️ N'oubliez pas de vérifier matériel et outils ⚠️</span></div>
+<div class="marquee"><span>⚠️ Не забудьте перевірити обладнання та інструменти ⚠️</span></div>
 
 <script>
-let currentLang = "uk"; // ✅ langue par défaut
+let currentLang = "uk"; // ✅ ukrainien par défaut
 
 function afficherPlanning() {
   fetch("planning.json?ts=" + Date.now())
