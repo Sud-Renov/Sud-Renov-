@@ -134,18 +134,20 @@ function renderSites() {
 
       // 🔹 Vérifier si l'ouvrier/tâche est déjà sur un autre chantier
       let chantierTrouve = null;
+      let villeTrouvee = null;
       sites.forEach(s => {
         if (s.id !== site.id) {
           s.crew.forEach(c => {
             if (c.type === data.type && c.name === data.name) {
-              chantierTrouve = s.title.fr; // on mémorise le nom du chantier
+              chantierTrouve = s.title.fr;   // nom du chantier
+              villeTrouvee = s.address.fr;   // adresse/ville
             }
           });
         }
       });
 
       if (chantierTrouve) {
-        alert(`⚠️ Attention, "${data.name}" est déjà affecté au chantier "${chantierTrouve}" !`);
+        alert(`⚠️ Attention, "${data.name}" est déjà affecté au chantier "${chantierTrouve}" à "${villeTrouvee}" !`);
         return; // on ne l'ajoute pas
       }
 
@@ -219,4 +221,3 @@ function importJSON() {
 }
 </script>
 </body>
-</html>
