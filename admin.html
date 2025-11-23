@@ -21,15 +21,15 @@
 <div class="sidebar">
   <h3>Ouvriers</h3>
   <input id="workerName" placeholder="Nom de l'ouvrier">
-  <button onclick="addWorker()">Ajouter</button>
+  <button type="button" onclick="addWorker()">Ajouter</button>
   <div id="workersList"></div>
 
   <h3>Tâches</h3>
   <input id="taskName" placeholder="Nom de la tâche">
-  <button onclick="addTask()">Ajouter</button>
+  <button type="button" onclick="addTask()">Ajouter</button>
   <div id="tasksList"></div>
 
-  <button onclick="exportJSON()">⬇️ Exporter JSON</button>
+  <button type="button" onclick="exportJSON()">⬇️ Exporter JSON</button>
 </div>
 
 <div class="main">
@@ -38,7 +38,7 @@
   <input id="siteAddressFr" placeholder="Adresse (FR)">
   <input id="siteStart" placeholder="Heure de début (ex: 08:00)">
   <input id="sitePhoto" placeholder="Chemin photo (ex: images/chantier.jpg)">
-  <button onclick="addSite()">Ajouter chantier</button>
+  <button id="addSiteBtn" type="button" onclick="addSite()">Ajouter chantier</button>
 
   <div id="sitesGrid"></div>
 </div>
@@ -48,15 +48,21 @@ let workers = [];
 let tasks = [];
 let sites = [];
 
-// Fonction de traduction FR -> UK via LibreTranslate
+// Traduction FR -> UK via LibreTranslate avec fallback
 async function translateToUk(textFr) {
-  const response = await fetch("https://libretranslate.de/translate", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ q: textFr, source: "fr", target: "uk", format: "text" })
-  });
-  const data = await response.json();
-  return data.translatedText;
+  try {
+    const response = await fetch("https://libretranslate.de/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ q: textFr, source: "fr", target: "uk", format: "text" })
+    });
+    if (!response.ok) throw new Error("API non disponible");
+    const data = await response.json();
+    return data.translatedText || textFr;
+  } catch (err) {
+    console.warn("Traduction indisponible, fallback FR :", err);
+    return textFr;
+  }
 }
 
 function makeChip(type, name) {
@@ -73,32 +79,44 @@ function makeChip(type, name) {
 }
 
 function addWorker() {
-  const name = document.getElementById("workerName").value.trim();
+  const input = document.getElementById("workerName");
+  const name = input.value.trim();
   if (!name) return;
   workers.push(name);
   document.getElementById("workersList").appendChild(makeChip("ouvrier", name));
-  document.getElementById("workerName").value="";
+  input.value="";
 }
 
 function addTask() {
-  const name = document.getElementById("taskName").value.trim();
+  const input = document.getElementById("taskName");
+  const name = input.value.trim();
   if (!name) return;
   tasks.push(name);
   document.getElementById("tasksList").appendChild(makeChip("tache", name));
-  document.getElementById("taskName").value="";
+  input.value="";
 }
 
 async function addSite() {
+  const btn = document.getElementById("addSiteBtn");
   const titleFr = document.getElementById("siteTitleFr").value.trim();
   const addressFr = document.getElementById("siteAddressFr").value.trim();
   const start = document.getElementById("siteStart").value.trim();
   const photo = document.getElementById("sitePhoto").value.trim();
-  if (!titleFr || !addressFr) return;
 
-  const titleUk = await translateToUk(titleFr);
-  const addressUk = await translateToUk(addressFr);
+  if (!titleFr || !addressFr) {
+    alert("Merci de remplir au minimum Titre (FR) et Adresse (FR).");
+    return;
+  }
 
-  const id = "site"+Math.random().toString(36).slice(2,9);
+  btn.disabled = true;
+  btn.textContent = "Ajout en cours…";
+
+  const [titleUk, addressUk] = await Promise.all([
+    translateToUk(titleFr),
+    translateToUk(addressFr)
+  ]);
+
+  const id = "site" + Math.random().toString(36).slice(2,9);
   sites.push({
     id,
     title: { fr: titleFr, uk: titleUk },
@@ -108,7 +126,15 @@ async function addSite() {
     crew: [],
     status: "ok"
   });
+
   renderSites();
+
+  document.getElementById("siteTitleFr").value="";
+  document.getElementById("siteAddressFr").value="";
+  document.getElementById("siteStart").value="";
+  document.getElementById("sitePhoto").value="";
+  btn.disabled = false;
+  btn.textContent = "Ajouter chantier";
 }
 
 function renderSites() {
@@ -120,7 +146,7 @@ function renderSites() {
     card.innerHTML=`
       <strong>${site.title.fr}</strong><br>
       📍 ${site.address.fr}<br>
-      🕗 ${site.start}<br>
+      🕗 ${site.start || ""}<br>
       <div class="droppable" data-id="${site.id}"></div>
     `;
     const dropzone=card.querySelector(".droppable");
