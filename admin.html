@@ -43,17 +43,19 @@
   <input id="siteTitleFr" placeholder="Titre (FR)">
   <input id="siteAddressFr" placeholder="Adresse/Ville (FR)">
   <input id="sitePhoto" placeholder="Chemin photo (ex: images/chantier.jpg)">
+  <input id="siteNotes" placeholder="Annotations (ex: pose ossature plafond)">
   <button id="addSiteBtn" type="button" onclick="addSite()">Ajouter chantier</button>
 
   <div id="sitesGrid"></div>
 </div>
 
 <script>
+// --- Début du script JavaScript ---
+
 let workers = [];
 let tasks = [];
 let sites = [];
 
-// Crée une puce draggable avec bouton ✏️
 function makeChip(type, name) {
   const div = document.createElement("div");
   div.className = "chip";
@@ -74,15 +76,6 @@ function makeChip(type, name) {
     if (newName && newName.trim()) {
       div.dataset.name = newName.trim();
       label.textContent = (type === "ouvrier" ? "👷 " : "🛠️ ") + div.dataset.name;
-      // Met à jour la source
-      if (type === "ouvrier") {
-        const idx = workers.indexOf(oldName);
-        if (idx !== -1) workers[idx] = newName.trim();
-      } else {
-        const idx = tasks.indexOf(oldName);
-        if (idx !== -1) tasks[idx] = newName.trim();
-      }
-      // Met à jour les affectations existantes
       sites.forEach(s => s.crew.forEach(c => {
         if (c.type === type && c.name === oldName) c.name = newName.trim();
       }));
@@ -120,6 +113,7 @@ function addSite() {
   const titleFr = document.getElementById("siteTitleFr").value.trim();
   const addressFr = document.getElementById("siteAddressFr").value.trim();
   const photo = document.getElementById("sitePhoto").value.trim();
+  const notes = document.getElementById("siteNotes").value.trim();
 
   if (!titleFr || !addressFr) {
     alert('Merci de remplir au minimum "Titre (FR)" et "Adresse/Ville (FR)".');
@@ -132,6 +126,7 @@ function addSite() {
     title: { fr: titleFr },
     address: { fr: addressFr },
     photo,
+    notes,
     crew: [],
     status: "ok"
   });
@@ -139,6 +134,7 @@ function addSite() {
   document.getElementById("siteTitleFr").value = "";
   document.getElementById("siteAddressFr").value = "";
   document.getElementById("sitePhoto").value = "";
+  document.getElementById("siteNotes").value = "";
 
   renderSites();
 }
@@ -155,6 +151,7 @@ function renderSites() {
     header.innerHTML = `
       <strong>${site.title.fr}</strong><br>
       📍 ${site.address.fr}<br>
+      📝 ${site.notes || ""}<br>
     `;
     card.appendChild(header);
 
@@ -170,7 +167,6 @@ function renderSites() {
       dropzone.classList.remove("dragover");
       const data = JSON.parse(e.dataTransfer.getData("text/plain"));
 
-      // Vérifier si déjà affecté ailleurs
       let chantierTrouve = null;
       let villeTrouvee = null;
       for (const s of sites) {
@@ -195,7 +191,6 @@ function renderSites() {
       renderSites();
     });
 
-    // Tags des affectations
     site.crew.forEach((c, idx) => {
       const tag = document.createElement("span");
       tag.className = "tag";
@@ -213,18 +208,17 @@ function renderSites() {
       dropzone.appendChild(tag);
     });
 
-    // Bouton ✏️ Éditer chantier
     const editSiteBtn = document.createElement("button");
     editSiteBtn.textContent = "✏️ Éditer chantier";
     editSiteBtn.onclick = () => {
       const newTitle = prompt("Nouveau titre :", site.title.fr);
       const newAddress = prompt("Nouvelle adresse/ville :", site.address.fr);
       const newPhoto = prompt("Nouvelle photo :", site.photo);
-
+      const newNotes = prompt("Nouvelles annotations :", site.notes || "");
       if (newTitle && newTitle.trim()) site.title.fr = newTitle.trim();
       if (newAddress && newAddress.trim()) site.address.fr = newAddress.trim();
       if (newPhoto && newPhoto.trim()) site.photo = newPhoto.trim();
-
+      if (newNotes && newNotes.trim()) site.notes = newNotes.trim();
       renderSites();
     };
     card.appendChild(editSiteBtn);
@@ -261,7 +255,6 @@ function importJSON() {
       if (!Array.isArray(data)) throw new Error("Format JSON invalide (attendu: tableau de chantiers).");
       sites = data;
 
-      // Reconstitue ouvriers/tâches à partir des affectations
       workers = [];
       tasks = [];
       const workersList = document.getElementById("workersList");
@@ -290,6 +283,8 @@ function importJSON() {
       console.error(err);
     });
 }
+
+// --- Fin du script JavaScript ---
 </script>
 </body>
 </html>
