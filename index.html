@@ -32,6 +32,13 @@
     cursor:pointer;
     font-weight:bold;
     font-size:1rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .lang-toggle img {
+    height:16px;
+    vertical-align:middle;
   }
   .grid {
     display:grid;
@@ -85,11 +92,14 @@
 <body>
 <h1>📋 Планування на день</h1>
 <div class="lang-toggle">
-  <button id="langBtn" onclick="toggleLang()">🇫🇷 Français</button>
+  <button id="langBtn" onclick="toggleLang()">
+    <img id="langFlag" src="images/fr.png" alt="FR">
+    <span id="langText">Français</span>
+  </button>
 </div>
 <div class="grid" id="planning"></div>
 
-<div class="marquee"><span>⚠️ Не забудьте перевірити обладнання та інструменти ⚠️</span></div>
+<div class="marquee"><span id="marqueeText">⚠️ Не забудьте перевірити обладнання та інструменти ⚠️</span></div>
 
 <script>
 let currentLang = "uk"; // ✅ ukrainien par défaut
@@ -126,10 +136,16 @@ function afficherPlanning() {
 function toggleLang() {
   if (currentLang === "uk") {
     currentLang = "fr";
-    document.getElementById("langBtn").textContent = "🇺🇦 Українська";
+    document.getElementById("langFlag").src = "images/ua.png";
+    document.getElementById("langFlag").alt = "UA";
+    document.getElementById("langText").textContent = "Українська";
+    document.getElementById("marqueeText").textContent = "⚠️ N'oubliez pas de vérifier matériel et outils ⚠️";
   } else {
     currentLang = "uk";
-    document.getElementById("langBtn").textContent = "🇫🇷 Français";
+    document.getElementById("langFlag").src = "images/fr.png";
+    document.getElementById("langFlag").alt = "FR";
+    document.getElementById("langText").textContent = "Français";
+    document.getElementById("marqueeText").textContent = "⚠️ Не забудьте перевірити обладнання та інструменти ⚠️";
   }
   afficherPlanning();
 }
